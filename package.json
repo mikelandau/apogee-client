@@ -1,0 +1,25 @@
+{
+  "name": "apogee-client",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikelandau/apogee-client.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mikelandau/apogee-client/issues"
+  },
+  "homepage": "https://github.com/mikelandau/apogee-client#readme",
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "pixi.js": "^5.3.7"
+  }
+}
