@@ -1,4 +1,5 @@
 import Fighter from "./models/fighter";
+import * as PIXI from "pixi.js";
 
 export default class Game {
 
@@ -24,7 +25,7 @@ export default class Game {
     }
 
     public async update(): Promise<void> {
-        this.fighter.updatePosition();
+        this.fighter.update();
     }
 
     public async draw(): Promise<void> {
