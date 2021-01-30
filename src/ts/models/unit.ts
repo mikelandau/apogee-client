@@ -29,24 +29,24 @@ export default abstract class Unit {
         return [a[0] + b[0], a[1] + b[1]];
     }
 
+    private getVectorComponents(magnitude: number, angleDegrees: number): [number, number] {
+        return [magnitude * Math.cos(this.degreesToRadians(angleDegrees)),
+            magnitude * Math.sin(this.degreesToRadians(angleDegrees))];
+    }
+
     public rotateTick(delta: number): void {
         this.orientation = (this.orientation + this.rotateSpeed * delta + 360) % 360;
     }
 
     public updateVelocityTick(delta: number): void {
-        const velX = this.velocity * Math.cos(this.degreesToRadians(this.velocityAngle));
-        const velY = this.velocity * Math.sin(this.degreesToRadians(this.velocityAngle));
-
-        const accX = this.acceleration * Math.cos(this.degreesToRadians(this.orientation)) * delta;
-        const accY = this.acceleration * Math.sin(this.degreesToRadians(this.orientation)) * delta;
+        const [velX, velY] = this.getVectorComponents(this.velocity, this.velocityAngle);
+        const [accX, accY] = this.getVectorComponents(this.acceleration, this.orientation);
 
         let newVelX = velX + accX * delta;
         let newVelY = velY + accY * delta;
 
         if (newVelX === 0) {
             this.velocityAngle = newVelY >= 0 ? 90 : 270;
-            this.velocity = newVelY;
-            return;
         } else if (newVelX < 0) {
             this.velocityAngle = (this.radiansToDegrees(Math.atan(newVelY/newVelX)) + 180) % 360;
             
