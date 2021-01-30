@@ -31,6 +31,7 @@
     "http-server": "^0.12.3"
   },
   "dependencies": {
-    "pixi.js": "^5.3.7"
+    "pixi.js": "^5.3.7",
+    "pixi.js-keyboard": "^1.0.9"
   }
 }

@@ -1,4 +1,4 @@
-import Unit from "./vector-drawable";
+import Unit from "./unit";
 
 export default class Fighter extends Unit {
     protected drawVectors: [number, number][] = [
