@@ -1,4 +1,5 @@
-import { addVectors, degreesToRadians, getVectorComponents, radiansToDegrees, rotateVector } from "../util/vector";
+import { addVectors, degreesToRadians, getMagnitudeAndAngle, getVectorComponents, multiplyVector, radiansToDegrees, rotateVector } from "../util/vector";
+import Planet from "./planet";
 
 export default abstract class Unit {
     posX: number = 0;
@@ -11,29 +12,34 @@ export default abstract class Unit {
 
     protected abstract drawVectors: [number, number][];
 
-
-
     public rotateTick(delta: number): void {
         this.orientation = (this.orientation + this.rotateSpeed * delta + 360) % 360;
     }
 
-    public updateVelocityTick(delta: number): void {
-        const [velX, velY] = getVectorComponents(this.velocity, degreesToRadians(this.velocityAngle));
-        const [accX, accY] = getVectorComponents(this.acceleration, degreesToRadians(this.orientation));
+    public reverse(): void {
+        this.orientation = (this.orientation + 180) % 360;
+    }
 
-        let newVelX = velX + accX * delta;
-        let newVelY = velY + accY * delta;
+    public updateVelocityTick(delta: number, planets: Planet[]): void {
+        const [oldVelX, oldVelY] = getVectorComponents(this.velocity, degreesToRadians(this.velocityAngle));
+        
+        let [accX, accY] = getVectorComponents(this.acceleration, degreesToRadians(this.orientation));
 
-        if (newVelX === 0) {
-            this.velocityAngle = newVelY >= 0 ? 90 : 270;
-        } else if (newVelX < 0) {
-            this.velocityAngle = (radiansToDegrees(Math.atan(newVelY/newVelX)) + 180) % 360;
-            
-        } else {
-            this.velocityAngle = (radiansToDegrees(Math.atan(newVelY/newVelX)) + 360) % 360;
+        for (const planet of planets) {
+            const [distance, angle] = getMagnitudeAndAngle([this.posX, this.posY], [planet.posX, planet.posY]);
+            let [planetGravX, planetGravY] = getVectorComponents(.02, angle);
+            [planetGravX, planetGravY] = multiplyVector([planetGravX, planetGravY], 200 / (distance === 0 ? 1 : distance));
+            accX += planetGravX;
+            accY += planetGravY;
         }
 
-        this.velocity = Math.sqrt(newVelX * newVelX + newVelY * newVelY);
+        let newVelX = oldVelX + accX * delta;
+        let newVelY = oldVelY + accY * delta;
+
+        const [magnitude, velocityAngle] = getMagnitudeAndAngle([0,0], [newVelX, newVelY]);
+
+        this.velocity = magnitude;
+        this.velocityAngle = radiansToDegrees(velocityAngle);
     }
 
     public updatePositionTick(delta: number): void {
@@ -45,8 +51,8 @@ export default abstract class Unit {
         const effectiveX = this.posX - viewOffsetX;
         const effectiveY = this.posY - viewOffsetY;
         
-        graphics.beginFill(0x0000CC);
-        graphics.lineStyle(2, 0xaaaaff, 1);
+        graphics.beginFill(0x000022);
+        graphics.lineStyle(3, 0x0c0cff, 1);
         let first: boolean = true;
         for (const vector of this.drawVectors) {
             const result = addVectors([effectiveX, effectiveY], rotateVector(vector, degreesToRadians(this.orientation)));

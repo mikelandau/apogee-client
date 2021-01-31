@@ -14,6 +14,15 @@ document.addEventListener("keyup", (k) => {
     return game.onKeyUp(k);
 });
 
+const instructions = document.createElement('div');
+instructions.innerHTML = `
+    <strong>W</strong> Thrust<br />
+    <strong>A/D</strong> Rotate<br />
+    <strong>S</strong> Reverse<br />
+`;
+
+document.body.appendChild(instructions);
+
 game.reset().then(() => {
     app.ticker.add(async (delta: number) => {
         await game.update(delta);

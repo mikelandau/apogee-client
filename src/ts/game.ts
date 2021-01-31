@@ -1,15 +1,18 @@
 import Fighter from "./models/fighter";
 import * as PIXI from "pixi.js";
 import Controls from "./controls";
+import Planet from "./models/planet";
 
 export default class Game { 
 
     stage: PIXI.Container;
     graphics: PIXI.Graphics;
-
     controls: Controls;
-
     fighter: Fighter;
+    planet: Planet;
+    planet2: Planet;
+
+    lockReverse: boolean = false;
 
     debugText: PIXI.Text;
 
@@ -27,12 +30,23 @@ export default class Game {
         this.debugText.x = 0;
         this.debugText.y = 0;
         stage.addChild(this.debugText);
+
+        this.planet = new Planet();
+        this.planet.posX = 500;
+        this.planet.posY = 300;
+
+        this.planet2 = new Planet();
+        this.planet2.posX = 900;
+        this.planet2.posY = 300;
     }
 
     public async onKeyDown(k: KeyboardEvent): Promise<void> {
         switch (k.key.toLowerCase()) {
             case "w":
                 this.controls.thrust = true;
+                break;
+            case "s":
+                this.controls.reverse = true;
                 break;
             case "a":
                 this.controls.rotateLeft = true;
@@ -47,6 +61,9 @@ export default class Game {
         switch (k.key.toLowerCase()) {
             case "w":
                 this.controls.thrust = false;
+                break;
+            case "s":
+                this.controls.reverse = false;
                 break;
             case "a":
                 this.controls.rotateLeft = false;
@@ -72,19 +89,28 @@ export default class Game {
             this.fighter.rotateTick(delta);
         }
 
+        if (this.controls.reverse && !this.lockReverse) {
+            this.lockReverse = true;
+            this.fighter.reverse();
+        } else if (!this.controls.reverse) {
+            this.lockReverse = false;
+        }
+
         if (this.controls.thrust) {
             this.fighter.acceleration = 0.1;
         } else {
             this.fighter.acceleration = 0;
         }
 
-        this.fighter.updateVelocityTick(delta);
+        this.fighter.updateVelocityTick(delta, [ this.planet, this.planet2 ]);
         this.fighter.updatePositionTick(delta);
     }
 
     public async draw(): Promise<void> {
         this.graphics.clear();
+        this.planet.drawToGraphicsScene(this.graphics, 0, 0);
+        this.planet2.drawToGraphicsScene(this.graphics, 0, 0);
         this.fighter.drawToGraphicsScene(this.graphics, 0, 0);
-        this.debugText.text = ``;
+        this.debugText.text = `${this.lockReverse}`;
     }
 }
