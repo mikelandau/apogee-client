@@ -48,21 +48,17 @@ export default abstract class Unit {
         this.posY += this.velocity * Math.sin(degreesToRadians(this.velocityAngle)) * delta;
     }
 
-    public checkPlanetCollision(planet: Planet): [ boolean, string ] {
+    public checkPlanetCollision(planet: Planet):  boolean  {
         let debugRet = "";
         for (let i = 0; i < this.drawVectors.length; ++i) {
             const thisPoint = addVectors([this.posX, this.posY], rotateVector(this.drawVectors[i], degreesToRadians(this.orientation)));
             const nextPoint = addVectors([this.posX, this.posY], rotateVector(this.drawVectors[(i + 1) % this.drawVectors.length], degreesToRadians(this.orientation)));
 
-            const [result, debug] = segmentIntersectsCirlce(thisPoint, nextPoint, [ planet.posX, planet.posY ], 128)
-            if (i === 0) {
-                debugRet = debug;
-            }            
-            if (result) {
-                return [true, debugRet];
+            if (segmentIntersectsCirlce(thisPoint, nextPoint, [ planet.posX, planet.posY ], 128)) {
+                return true;
             }
         }
-        return [false, debugRet];
+        return false;
     }
 
     public drawToGraphicsScene(graphics: PIXI.Graphics, viewOffsetX: number, viewOffsetY: number): void {

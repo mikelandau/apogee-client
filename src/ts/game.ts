@@ -15,8 +15,6 @@ export default class Game {
     lockReverse: boolean = false;
     collision: boolean = false;
 
-    collisionDebug: string = "";
-
     debugText: PIXI.Text;
 
     constructor(stage: PIXI.Container) {
@@ -104,14 +102,13 @@ export default class Game {
         this.fighter.updateVelocityTick(delta, [ this.planet ]);
         this.fighter.updatePositionTick(delta);
 
-        [this.collision, this.collisionDebug] = this.fighter.checkPlanetCollision(this.planet);
+        this.collision = this.fighter.checkPlanetCollision(this.planet);
     }
 
     public async draw(): Promise<void> {
         this.graphics.clear();
         this.planet.drawToGraphicsScene(this.graphics, 0, 0);
         this.fighter.drawToGraphicsScene(this.graphics, 0, 0);
-        this.debugText.text = `${this.collision}
-${this.collisionDebug}`;
+        this.debugText.text = `${this.collision}`;
     }
 }
