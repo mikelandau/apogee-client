@@ -17,8 +17,16 @@ export function addVectors(a: [number, number], b: [number, number]): [number, n
     return [a[0] + b[0], a[1] + b[1]];
 }
 
+export function subtractVectors(a: [number, number], b: [number, number]): [number, number] {
+    return [a[0] - b[0], a[1] - b[1]];
+}
+
 export function multiplyVector(a: [number, number], k: number) {
     return [a[0] * k, a[1] * k];
+}
+
+export function dotProduct(a: [number, number], b: [number, number]): number {
+    return a[0] * b[0] + a[1] * b[1];
 }
 
 export function getVectorComponents(magnitude: number, angleDegrees: number): [number, number] {

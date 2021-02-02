@@ -2,6 +2,7 @@ import Fighter from "./models/fighter";
 import * as PIXI from "pixi.js";
 import Controls from "./controls";
 import Planet from "./models/planet";
+import { segmentIntersectsCirlce } from "./util/collision";
 
 export default class Game { 
 
@@ -10,9 +11,11 @@ export default class Game {
     controls: Controls;
     fighter: Fighter;
     planet: Planet;
-    planet2: Planet;
 
     lockReverse: boolean = false;
+    collision: boolean = false;
+
+    collisionDebug: string = "";
 
     debugText: PIXI.Text;
 
@@ -34,10 +37,6 @@ export default class Game {
         this.planet = new Planet();
         this.planet.posX = 500;
         this.planet.posY = 300;
-
-        this.planet2 = new Planet();
-        this.planet2.posX = 900;
-        this.planet2.posY = 300;
     }
 
     public async onKeyDown(k: KeyboardEvent): Promise<void> {
@@ -102,15 +101,17 @@ export default class Game {
             this.fighter.acceleration = 0;
         }
 
-        this.fighter.updateVelocityTick(delta, [ this.planet, this.planet2 ]);
+        this.fighter.updateVelocityTick(delta, [ this.planet ]);
         this.fighter.updatePositionTick(delta);
+
+        [this.collision, this.collisionDebug] = this.fighter.checkPlanetCollision(this.planet);
     }
 
     public async draw(): Promise<void> {
         this.graphics.clear();
         this.planet.drawToGraphicsScene(this.graphics, 0, 0);
-        this.planet2.drawToGraphicsScene(this.graphics, 0, 0);
         this.fighter.drawToGraphicsScene(this.graphics, 0, 0);
-        this.debugText.text = `${this.lockReverse}`;
+        this.debugText.text = `${this.collision}
+${this.collisionDebug}`;
     }
 }

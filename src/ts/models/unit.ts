@@ -1,3 +1,4 @@
+import { segmentIntersectsCirlce } from "../util/collision";
 import { addVectors, degreesToRadians, getMagnitudeAndAngle, getVectorComponents, multiplyVector, radiansToDegrees, rotateVector } from "../util/vector";
 import Planet from "./planet";
 
@@ -45,6 +46,23 @@ export default abstract class Unit {
     public updatePositionTick(delta: number): void {
         this.posX += this.velocity * Math.cos(degreesToRadians(this.velocityAngle)) * delta;
         this.posY += this.velocity * Math.sin(degreesToRadians(this.velocityAngle)) * delta;
+    }
+
+    public checkPlanetCollision(planet: Planet): [ boolean, string ] {
+        let debugRet = "";
+        for (let i = 0; i < this.drawVectors.length; ++i) {
+            const thisPoint = addVectors([this.posX, this.posY], rotateVector(this.drawVectors[i], degreesToRadians(this.orientation)));
+            const nextPoint = addVectors([this.posX, this.posY], rotateVector(this.drawVectors[(i + 1) % this.drawVectors.length], degreesToRadians(this.orientation)));
+
+            const [result, debug] = segmentIntersectsCirlce(thisPoint, nextPoint, [ planet.posX, planet.posY ], 128)
+            if (i === 0) {
+                debugRet = debug;
+            }            
+            if (result) {
+                return [true, debugRet];
+            }
+        }
+        return [false, debugRet];
     }
 
     public drawToGraphicsScene(graphics: PIXI.Graphics, viewOffsetX: number, viewOffsetY: number): void {
