@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import Controls from "./controls";
 import Planet from "./models/planet";
 import { segmentIntersectsCirlce } from "./util/collision";
+import { degreesToRadians, getAngleDegreeDifference, getMagnitudeAndAngle, getVectorComponents, radiansToDegrees } from "./util/vector";
 
 export default class Game { 
 
@@ -80,35 +81,56 @@ export default class Game {
     }
 
     public async update(delta: number): Promise<void> {
-        if (this.controls.rotateLeft && !this.controls.rotateRight) {
-            this.fighter.rotateTick(-delta);
-        } else if (this.controls.rotateRight && !this.controls.rotateLeft) {
-            this.fighter.rotateTick(delta);
-        }
-
-        if (this.controls.reverse && !this.lockReverse) {
-            this.lockReverse = true;
-            this.fighter.reverse();
-        } else if (!this.controls.reverse) {
-            this.lockReverse = false;
-        }
-
         if (this.controls.thrust) {
+            this.fighter.attachedPlanet = undefined;
             this.fighter.acceleration = 0.1;
         } else {
             this.fighter.acceleration = 0;
         }
 
-        this.fighter.updateVelocityTick(delta, [ this.planet ]);
-        this.fighter.updatePositionTick(delta);
-
-        this.collision = this.fighter.checkPlanetCollision(this.planet);
+        if (this.fighter.attachedPlanet) {
+            const [x, y] = getVectorComponents(Planet.radius + 25, degreesToRadians(this.fighter.attachedPlanetAngle));
+            this.fighter.posX = this.fighter.attachedPlanet.posX + x;
+            this.fighter.posY = this.fighter.attachedPlanet.posY + y;
+            this.fighter.orientation = this.fighter.attachedPlanetAngle;
+            this.fighter.acceleration = 0;
+            this.fighter.velocity = 0;
+        } else {
+            if (this.controls.rotateLeft && !this.controls.rotateRight) {
+                this.fighter.rotateTick(-delta);
+            } else if (this.controls.rotateRight && !this.controls.rotateLeft) {
+                this.fighter.rotateTick(delta);
+            }
+    
+            if (this.controls.reverse && !this.lockReverse) {
+                this.lockReverse = true;
+                this.fighter.reverse();
+            } else if (!this.controls.reverse) {
+                this.lockReverse = false;
+            }
+    
+            this.fighter.updateVelocityTick(delta, [ this.planet ]);
+            this.fighter.updatePositionTick(delta);
+    
+            const collision = this.fighter.checkPlanetCollision(this.planet);
+    
+            const angleToShip = radiansToDegrees(getMagnitudeAndAngle([this.planet.posX, this.planet.posY], [this.fighter.posX, this.fighter.posY])[1]);
+    
+            if (collision && getAngleDegreeDifference(angleToShip, this.fighter.orientation) < 20 && this.fighter.velocity < 1) {
+                this.fighter.attachedPlanet = this.planet;
+                this.fighter.attachedPlanetAngle = angleToShip;
+                this.fighter.velocity = 0;
+                this.fighter.acceleration = 0;
+            } else if (collision) {
+                this.reset();
+            }
+        }
     }
 
     public async draw(): Promise<void> {
         this.graphics.clear();
         this.planet.drawToGraphicsScene(this.graphics, 0, 0);
         this.fighter.drawToGraphicsScene(this.graphics, 0, 0);
-        this.debugText.text = `${this.collision}`;
+        this.debugText.text = ``;
     }
 }

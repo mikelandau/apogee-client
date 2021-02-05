@@ -11,6 +11,9 @@ export default abstract class Unit {
     orientation: number = 0;
     rotateSpeed: number = 0;
 
+    attachedPlanet: Planet | undefined = undefined;
+    attachedPlanetAngle: number = 0;
+
     protected abstract drawVectors: [number, number][];
 
     public rotateTick(delta: number): void {
@@ -49,7 +52,6 @@ export default abstract class Unit {
     }
 
     public checkPlanetCollision(planet: Planet):  boolean  {
-        let debugRet = "";
         for (let i = 0; i < this.drawVectors.length; ++i) {
             const thisPoint = addVectors([this.posX, this.posY], rotateVector(this.drawVectors[i], degreesToRadians(this.orientation)));
             const nextPoint = addVectors([this.posX, this.posY], rotateVector(this.drawVectors[(i + 1) % this.drawVectors.length], degreesToRadians(this.orientation)));

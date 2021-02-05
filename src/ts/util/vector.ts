@@ -43,7 +43,7 @@ export function getMagnitudeAndAngle(origin: [number, number], destination: [num
     if (deltaX === 0 && deltaY === 0) {
         angle = 0;
     } else if (deltaX === 0) {
-        angle = deltaY >= 0 ? 90 : 270;
+        angle = deltaY >= 0 ? .5 * Math.PI : 1.5 * Math.PI;
     } else if (deltaX < 0) {
         angle = (Math.atan(deltaY/deltaX) + Math.PI) % (2 * Math.PI);
     } else {
@@ -53,4 +53,8 @@ export function getMagnitudeAndAngle(origin: [number, number], destination: [num
     const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     return [magnitude, angle];
+}
+
+export function getAngleDegreeDifference(adeg: number, bdeg: number) {
+    return 180 - Math.abs(Math.abs(adeg - bdeg) - 180);
 }
